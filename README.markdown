@@ -107,7 +107,7 @@ This plugin ships with all required models, including the "Clients" model for ad
 You may wish to handle adding clients yourself, see the tables.sql for the schema, or you can use the convenience method included in the model, like so:
 
 ```PHP
-$client = $this->OAuth->Client->add('http://www.return_url.com')
+$client = $this->OAuth->AuthClient->add('http://www.return_url.com')
 ```
 Which will generate then client_id and client_secret and return something like:
 

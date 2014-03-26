@@ -90,7 +90,7 @@ class OAuthComponent extends Component implements IOAuth2Storage, IOAuth2Refresh
 	public $AuthCode;
 
 /**
- * Clients object.
+ * AuthClients object.
  *
  * @var object
  */

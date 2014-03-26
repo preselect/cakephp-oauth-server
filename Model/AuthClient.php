@@ -138,9 +138,9 @@ class AuthClient extends OAuthAppModel {
 
 		//You may wish to change this
 		$this->data['AuthClient']['client_id'] = base64_encode(uniqid() . substr(uniqid(), 11, 2));	// e.g. NGYcZDRjODcxYzFkY2Rk (seems popular format)
-		//$this->data['Client']['client_id'] = uniqid();					// e.g. 4f3d4c8602346
-		//$this->data['Client']['client_id'] = str_replace('.', '', uniqid('', true));		// e.g. 4f3d4c860235a529118898
-		//$this->data['Client']['client_id'] = str_replace('-', '', String::uuid());		// e.g. 4f3d4c80cb204b6a8e580a006f97281a
+		//$this->data['AuthClient']['client_id'] = uniqid();					// e.g. 4f3d4c8602346
+		//$this->data['AuthClient']['client_id'] = str_replace('.', '', uniqid('', true));		// e.g. 4f3d4c860235a529118898
+		//$this->data['AuthClient']['client_id'] = str_replace('-', '', String::uuid());		// e.g. 4f3d4c80cb204b6a8e580a006f97281a
 
 		$this->addClientSecret = $this->newClientSecret();
 		$this->data['AuthClient']['client_secret'] = $this->addClientSecret;
