@@ -4,13 +4,13 @@ App::uses('OAuthAppModel', 'OAuth.Model');
 App::uses('String', 'Utility');
 
 /**
- * Client Model
+ * AuthClient Model
  *
  * @property AccessToken $AccessToken
  * @property AuthCode $AuthCode
  * @property RefreshToken $RefreshToken
  */
-class Client extends OAuthAppModel {
+class AuthClient extends OAuthAppModel {
 
 /**
  * Primary key field
@@ -118,32 +118,32 @@ class Client extends OAuthAppModel {
  * @return booleen Success of failure
  */
 	public function add($data = null) {
-		$this->data['Client'] = array();
+		$this->data['AuthClient'] = array();
 
-		if (is_array($data) && is_array($data['Client']) && array_key_exists('redirect_uri', $data['Client'])) {
-			$this->data['Client']['redirect_uri'] = $data['Client']['redirect_uri'];
+		if (is_array($data) && is_array($data['AuthClient']) && array_key_exists('redirect_uri', $data['AuthClient'])) {
+			$this->data['AuthClient']['redirect_uri'] = $data['AuthClient']['redirect_uri'];
 		} elseif (is_string($data)) {
-			$this->data['Client']['redirect_uri'] = $data;
+			$this->data['AuthClient']['redirect_uri'] = $data;
 		} else {
 			return false;
 		}
 
 		/**
 		 * in case you have additional fields in the clients table such as name, description etc
-		 * and you are using $data['Client']['name'], etc to save
+		 * and you are using $data['AuthClient']['name'], etc to save
 		 **/
-		if (is_array($data['Client'])) {
-			$this->data['Client'] = array_merge($data['Client'], $this->data['Client']);
+		if (isset($data['AuthClient']) && is_array($data['AuthClient'])) {
+			$this->data['AuthClient'] = array_merge($data['AuthClient'], $this->data['AuthClient']);
 		}
 
 		//You may wish to change this
-		$this->data['Client']['client_id'] = base64_encode(uniqid() . substr(uniqid(), 11, 2));	// e.g. NGYcZDRjODcxYzFkY2Rk (seems popular format)
+		$this->data['AuthClient']['client_id'] = base64_encode(uniqid() . substr(uniqid(), 11, 2));	// e.g. NGYcZDRjODcxYzFkY2Rk (seems popular format)
 		//$this->data['Client']['client_id'] = uniqid();					// e.g. 4f3d4c8602346
 		//$this->data['Client']['client_id'] = str_replace('.', '', uniqid('', true));		// e.g. 4f3d4c860235a529118898
 		//$this->data['Client']['client_id'] = str_replace('-', '', String::uuid());		// e.g. 4f3d4c80cb204b6a8e580a006f97281a
 
 		$this->addClientSecret = $this->newClientSecret();
-		$this->data['Client']['client_secret'] = $this->addClientSecret;
+		$this->data['AuthClient']['client_secret'] = $this->addClientSecret;
 
 		return $this->save($this->data);
 	}
@@ -166,7 +166,7 @@ class Client extends OAuthAppModel {
 
 	public function afterSave($created, $options = array()) {
 		if ($this->addClientSecret) {
-			$this->data['Client']['client_secret'] = $this->addClientSecret;
+			$this->data['AuthClient']['client_secret'] = $this->addClientSecret;
 		}
 		return true;
 	}

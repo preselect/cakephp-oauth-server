@@ -5,7 +5,7 @@ App::uses('OAuthAppModel', 'OAuth.Model');
 /**
  * RefreshToken Model
  *
- * @property Client $Client
+ * @property AuthClient $AuthClient
  * @property User $User
  */
 class RefreshToken extends OAuthAppModel {
@@ -67,8 +67,8 @@ class RefreshToken extends OAuthAppModel {
  * @var array
  */
 	public $belongsTo = array(
-		'Client' => array(
-			'className' => 'OAuth.Client',
+		'AuthClient' => array(
+			'className' => 'OAuth.AuthClient',
 			'foreignKey' => 'client_id',
 			'conditions' => '',
 			'fields' => '',

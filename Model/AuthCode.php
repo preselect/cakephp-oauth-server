@@ -5,7 +5,7 @@ App::uses('OAuthAppModel', 'OAuth.Model');
 /**
  * AuthCode Model
  *
- * @property Client $Client
+ * @property AuthClient $AuthClient
  * @property User $User
  */
 class AuthCode extends OAuthAppModel {
@@ -72,8 +72,8 @@ class AuthCode extends OAuthAppModel {
  * @var array
  */
 	public $belongsTo = array(
-		'Client' => array(
-			'className' => 'OAuth.Client',
+		'AuthClient' => array(
+			'className' => 'OAuth.AuthClient',
 			'foreignKey' => 'client_id',
 			'conditions' => '',
 			'fields' => '',

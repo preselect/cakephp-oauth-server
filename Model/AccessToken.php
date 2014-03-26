@@ -5,7 +5,7 @@ App::uses('OAuthAppModel', 'OAuth.Model');
 /**
  * AccessToken Model
  *
- * @property Client $Client
+ * @property AuthClient $AuthClient
  * @property User $User
  */
 class AccessToken extends OAuthAppModel {
@@ -67,8 +67,8 @@ class AccessToken extends OAuthAppModel {
  * @var array
  */
 	public $belongsTo = array(
-		'Client' => array(
-			'className' => 'OAuth.Client',
+		'AuthClient' => array(
+			'className' => 'OAuth.AuthClient',
 			'foreignKey' => 'client_id',
 			'conditions' => '',
 			'fields' => '',

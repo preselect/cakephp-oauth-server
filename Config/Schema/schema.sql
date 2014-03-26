@@ -21,8 +21,8 @@ CREATE TABLE `oauth_auth_codes` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
-DROP TABLE IF EXISTS `oauth_clients`;
-CREATE TABLE `oauth_clients` (
+DROP TABLE IF EXISTS `oauth_auth_clients`;
+CREATE TABLE `oauth_auth_clients` (
   `client_id` char(20) NOT NULL,
   `client_secret` char(40) NOT NULL,
   `redirect_uri` varchar(255) NOT NULL,

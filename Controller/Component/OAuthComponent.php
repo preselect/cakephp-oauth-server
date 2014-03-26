@@ -94,7 +94,7 @@ class OAuthComponent extends Component implements IOAuth2Storage, IOAuth2Refresh
  *
  * @var object
  */
-	public $Client;
+	public $AuthClient;
 
 /**
  * Array of globally supported grant types
@@ -144,7 +144,7 @@ class OAuthComponent extends Component implements IOAuth2Storage, IOAuth2Refresh
 		$this->OAuth2 = new OAuth2($this);
 		$this->AccessToken = ClassRegistry::init(array('class' => 'OAuth.AccessToken', 'alias' => 'AccessToken'));
 		$this->AuthCode = ClassRegistry::init(array('class' => 'OAuth.AuthCode', 'alias' => 'AuthCode'));
-		$this->Client = ClassRegistry::init(array('class' => 'OAuth.Client', 'alias' => 'Client'));
+		$this->AuthClient = ClassRegistry::init(array('class' => 'OAuth.AuthClient', 'alias' => 'AuthClient'));
 		$this->RefreshToken = ClassRegistry::init(array('class' => 'OAuth.RefreshToken', 'alias' => 'RefreshToken'));
 	}
 
@@ -402,12 +402,12 @@ class OAuthComponent extends Component implements IOAuth2Storage, IOAuth2Refresh
 		if ($client_secret) {
 			$conditions['client_secret'] = $client_secret;
 		}
-		$client = $this->Client->find('first', array(
+		$client = $this->AuthClient->find('first', array(
 			'conditions' => $conditions,
 			'recursive' => -1
 		));
 		if ($client) {
-			return $client['Client'];
+			return $client['AuthClient'];
 		};
 		return false;
 	}
@@ -421,13 +421,13 @@ class OAuthComponent extends Component implements IOAuth2Storage, IOAuth2Refresh
  * @return boolean
  */
 	public function getClientDetails($client_id) {
-		$client = $this->Client->find('first', array(
+		$client = $this->AuthClient->find('first', array(
 			'conditions' => array('client_id' => $client_id),
 			'fields' => array('client_id', 'redirect_uri'),
 			'recursive' => -1
 		));
 		if ($client) {
-			return $client['Client'];
+			return $client['AuthClient'];
 		}
 		return false;
 	}
