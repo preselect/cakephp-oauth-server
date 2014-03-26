@@ -19,7 +19,7 @@ class FirstMigrationOAuth extends CakeMigration {
 	public $migration = array(
 		'up' => array(
 			'create_table' => array(
-				'access_tokens' => array(
+				'oauth_access_tokens' => array(
 					'oauth_token' => array('type' => 'string', 'null' => false, 'default' => NULL, 'length' => 40, 'key' => 'primary', 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 					'client_id' => array('type' => 'string', 'null' => false, 'default' => NULL, 'length' => 36, 'collate' => 'utf8_general_ci', 'charset' => 'utf8', 'after' => 'oauth_token'),
 					'user_id' => array('type' => 'integer', 'null' => false, 'default' => NULL, 'after' => 'client_id'),
@@ -31,7 +31,7 @@ class FirstMigrationOAuth extends CakeMigration {
 					'tableParameters' => array('charset' => 'utf8', 'collate' => 'utf8_general_ci', 'engine' => 'MyISAM'),
 				),
 
-				'auth_codes' => array(
+				'oauth_auth_codes' => array(
 					'code' => array('type' => 'string', 'null' => false, 'default' => NULL, 'length' => 40, 'key' => 'primary', 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 					'client_id' => array('type' => 'string', 'null' => false, 'default' => NULL, 'length' => 36, 'collate' => 'utf8_general_ci', 'charset' => 'utf8', 'after' => 'code'),
 					'user_id' => array('type' => 'integer', 'null' => false, 'default' => NULL, 'after' => 'client_id'),
@@ -44,7 +44,7 @@ class FirstMigrationOAuth extends CakeMigration {
 					'tableParameters' => array('charset' => 'utf8', 'collate' => 'utf8_general_ci', 'engine' => 'MyISAM'),
 				),
 
-				'clients' => array(
+				'oauth_clients' => array(
 					'client_id' => array('type' => 'string', 'null' => false, 'default' => NULL, 'length' => 20, 'key' => 'primary', 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 					'client_secret' => array('type' => 'string', 'null' => false, 'default' => NULL, 'length' => 40, 'collate' => 'utf8_general_ci', 'charset' => 'utf8', 'after' => 'client_id'),
 					'redirect_uri' => array('type' => 'string', 'null' => false, 'default' => NULL, 'collate' => 'utf8_general_ci', 'charset' => 'utf8', 'after' => 'client_secret'),
@@ -55,7 +55,7 @@ class FirstMigrationOAuth extends CakeMigration {
 					'tableParameters' => array('charset' => 'utf8', 'collate' => 'utf8_general_ci', 'engine' => 'MyISAM'),
 				),
 
-				'refresh_tokens' => array(
+				'oauth_refresh_tokens' => array(
 					'refresh_token' => array('type' => 'string', 'null' => false, 'default' => NULL, 'length' => 40, 'key' => 'primary', 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 					'client_id' => array('type' => 'string', 'null' => false, 'default' => NULL, 'length' => 36, 'collate' => 'utf8_general_ci', 'charset' => 'utf8', 'after' => 'refresh_token'),
 					'user_id' => array('type' => 'integer', 'null' => false, 'default' => NULL, 'after' => 'client_id'),
@@ -70,7 +70,7 @@ class FirstMigrationOAuth extends CakeMigration {
 		),
 		'down' => array(
 			'drop_table' => array(
-				'access_tokens', 'auth_codes', 'clients', 'refresh_tokens'
+				'oauth_access_tokens', 'oauth_auth_codes', 'oauth_clients', 'oauth_refresh_tokens'
 			),
 		),
 	);
