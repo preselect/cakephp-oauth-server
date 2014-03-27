@@ -80,28 +80,7 @@ class OAuthController extends OAuthAppController {
                 if (!$this->Auth->loggedIn()) {
                         $this->redirect(array('action' => 'login', '?' => $this->request->query));
                 }
-
-                if ($this->request->is('post')) {
-                        $this->validateRequest();
-
-                        $userId = $this->Auth->user('id');
-
-                        if ($this->Session->check('OAuth.logout')) {
-                                $this->Auth->logout();
-                                $this->Session->delete('OAuth.logout');
-                        }
-
-                        //Did they accept the form? Adjust accordingly
-                        $accepted = $this->request->data['accept'] == 'Yep';
-                        try {
-                                $this->OAuth->finishClientAuthorization($accepted, $userId, $this->request->data['Authorize']);
-                        } catch (OAuth2RedirectException $e) {
-                                $e->sendHttpResponse();
-                        }
-                }
-
-                // Clickjacking prevention (supported by IE8+, FF3.6.9+, Opera10.5+, Safari4+, Chrome 4.1.249.1042+)
-                $this->response->header('X-Frame-Options: DENY');
+                $this->validateRequest();
 
                 if ($this->Session->check('OAuth.params')) {
                         $OAuthParams = $this->Session->read('OAuth.params');
@@ -113,7 +92,18 @@ class OAuthController extends OAuthAppController {
                                 $e->sendHttpResponse();
                         }
                 }
-                $this->set(compact('OAuthParams'));
+                $userId = $this->Auth->user('id');
+
+                if ($this->Session->check('OAuth.logout')) {
+                        $this->Auth->logout();
+                        $this->Session->delete('OAuth.logout');
+                }
+
+                try {
+                        $this->OAuth->finishClientAuthorization(true, $userId, $OAuthParams);
+                } catch (OAuth2RedirectException $e) {
+                        $e->sendHttpResponse();
+                }
         }
 
         /**
@@ -171,19 +161,6 @@ class OAuthController extends OAuthAppController {
                 } catch (OAuth2ServerException $e) {
                         $e->sendHttpResponse();
                 }
-        }
-
-        /**
-         * Quick and dirty example implementation for protecetd resource
-         *
-         * User accesible via $this->OAuth->user();
-         * Single fields avaliable via $this->OAuth->user("id");
-         *
-         */
-        public function userinfo() {
-                $this->layout = null;
-                $user = $this->OAuth->user();
-                $this->set(compact('user'));
         }
 
         /**
