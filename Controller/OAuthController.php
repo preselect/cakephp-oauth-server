@@ -60,7 +60,6 @@ class OAuthController extends OAuthAppController {
          */
         public function beforeFilter() {
                 parent::beforeFilter();
-                $this->OAuth->authenticate = array('fields' => array('username' => 'email'));
                 $this->Auth->allow($this->OAuth->allowedActions);
                 $this->Security->blackHoleCallback = 'blackHole';
         }
@@ -201,5 +200,5 @@ class OAuthController extends OAuthAppController {
                         throw new BadRequestException(__d('OAuth', 'The request has been black-holed'));
                 }
         }
-
+        
 }
