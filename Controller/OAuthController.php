@@ -50,7 +50,7 @@ class OAuthController extends OAuthAppController {
             'Session',
             'Security'
         );
-        public $uses = array('Users');
+        public $uses = array('User');
         public $helpers = array('Form');
         private $blackHoled = false;
 
@@ -123,6 +123,11 @@ class OAuthController extends OAuthAppController {
                         $this->Session->write('OAuth.params', $OAuthParams);
                         //Remove old auth messages
                         $this->Session->delete('Message.auth');
+                        //Get current user and set bundle filter
+                        $currentUser = $this->Auth->user();
+                        if($currentUser['bundle_id']) {
+                                $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
+                        }
                         //Off we go
                         $this->redirect(array('action' => 'authorize'));
                 } elseif ($this->request->is('post')) {
