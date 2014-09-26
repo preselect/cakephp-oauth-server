@@ -1,6 +1,12 @@
+<?php
+    if(empty($oauth_model))
+    {
+        $oauth_model = 'User';
+    }
+?>
 <div class="users form">
         <?php echo $this->Session->flash('auth'); ?>
-        <?php echo $this->Form->create('User'); ?>
+        <?php echo $this->Form->create($oauth_model); ?>
         <fieldset>
                 <legend><?php echo __d('portal', 'Please enter your username and password'); ?></legend>
                 <?php

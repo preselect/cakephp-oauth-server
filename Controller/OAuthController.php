@@ -123,12 +123,23 @@ class OAuthController extends OAuthAppController {
                         $this->Session->write('OAuth.params', $OAuthParams);
                         //Remove old auth messages
                         $this->Session->delete('Message.auth');
-                        //Get current user and set bundle filter
-                        $currentUser = $this->Auth->user();
-                        if($currentUser['bundle_id']) {
+
+                        //Account inheritance
+                        if($this->useAccountsForOAuth())
+                        {
+                            $currentAccount = $this->Auth->user();
+                            @$currentUser = $currentAccount['User'];
+                            unset($currentAccount['User']);
+                            $currentUser['is_user']=1;
+                            $currentUser['account'] = $currentAccount;
+                            $this->Session->write('Auth.User', $currentUser);
+                        }
+
+                        $this->loadModel('User');
+                        if(!empty($currentUser['bundle_id'])) {
                                 $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
                         }
-                        //Off we go
+
                         $this->redirect(array('action' => 'authorize'));
                 } elseif ($this->request->is('post')) {
                         $this->Session->setFlash(__('Username or password is incorrect'), 'default', array(), 'auth');
