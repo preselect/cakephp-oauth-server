@@ -75,7 +75,7 @@ class OAuthController extends OAuthAppController {
          * 	- redirect_url
          *
          */
-        public function authorize() {
+        public function authorize($account_id = null) {
                 if (!$this->Auth->loggedIn()) {
                         $this->redirect(array('action' => 'login', '?' => $this->request->query));
                 }
@@ -98,6 +98,8 @@ class OAuthController extends OAuthAppController {
                         $this->Session->delete('OAuth.logout');
                 }
 
+
+                $OAuthParams = array_merge($OAuthParams, array('state' => $account_id));
                 try {
                         $this->OAuth->finishClientAuthorization(true, $userId, $OAuthParams);
                 } catch (OAuth2RedirectException $e) {
@@ -125,6 +127,7 @@ class OAuthController extends OAuthAppController {
                         $this->Session->delete('Message.auth');
 
                         //Account inheritance
+                        $account_id = null;
                         if($this->useAccountsForOAuth())
                         {
                             $currentAccount = $this->Auth->user();
@@ -132,6 +135,7 @@ class OAuthController extends OAuthAppController {
                             unset($currentAccount['User']);
                             $currentUser['is_user']=1;
                             $currentUser['account'] = $currentAccount;
+                            $account_id = $currentAccount['id'];
                             $this->Session->write('Auth.User', $currentUser);
                         }
 
@@ -140,7 +144,7 @@ class OAuthController extends OAuthAppController {
                                 $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
                         }
 
-                        $this->redirect(array('action' => 'authorize'));
+                        $this->redirect(array('action' => 'authorize', $account_id));
                 } elseif ($this->request->is('post')) {
                         $this->Session->setFlash(__('Username or password is incorrect'), 'default', array(), 'auth');
                 }
