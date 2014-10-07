@@ -120,7 +120,7 @@ class OAuthController extends OAuthAppController {
                         $this->validateRequest();
                 }
 
-                if ($this->Auth->login()) {
+                if ($this->request->is('post') && $this->Auth->login()) {
                         //Write the auth params to the session for later
                         $this->Session->write('OAuth.params', $OAuthParams);
                         //Remove old auth messages
