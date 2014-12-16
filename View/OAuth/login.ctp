@@ -3,7 +3,8 @@
     {
         $oauth_model = 'User';
     }
-    $filter = $this->Session->read('Auth.User.type') == 'COMPANY';
+    $filter = $this->Session->read('Auth.User.type') == 'COMPANY' && $this->request->query['oauth_model'] == 'account';
+
 ?>
 <div class="users form <?php echo $filter ? 'login' : 'filter_login'; ?>">
         <?php echo $this->Session->flash('auth'); ?>
