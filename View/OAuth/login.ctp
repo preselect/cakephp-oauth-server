@@ -4,7 +4,6 @@
         $oauth_model = 'User';
     }
     $filter = $this->Session->read('Auth.User.type') == 'COMPANY';
-//$filter = true;
 ?>
 <div class="users form <?php echo $filter ? 'login' : 'filter_login'; ?>">
         <?php echo $this->Session->flash('auth'); ?>
@@ -25,7 +24,7 @@
 </div>
 <?php if($filter): ?>
     <div class="users form shibboleth">
-        <?php echo $this->Form->create('Account', array('url' => array('plugin' => false, 'controller' => 'accounts', 'action' => 'register'))); ?>
+        <?php echo $this->Form->create('Account', array('url' => array('plugin' => false, 'controller' => 'accounts', 'action' => 'register', 'autologin' => 'false'))); ?>
         <fieldset>
             <legend><?php echo __d('portal', 'Not registered yet? Here you can create your personal user account'); ?></legend>
             <?php
