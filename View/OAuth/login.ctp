@@ -17,8 +17,8 @@
                 }
                 ?>
                 <?php
-                echo $this->Form->input('username');
-                echo $this->Form->input('password');
+                echo $this->Form->input('username', array('label' => __d('portal', 'Username')));
+                echo $this->Form->input('password', array('label' => __d('portal', 'Password')));
                 ?>
         </fieldset>
         <?php echo $this->Form->end(__d('portal', 'Login')); ?>
