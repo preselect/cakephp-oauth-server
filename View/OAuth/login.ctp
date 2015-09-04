@@ -22,6 +22,9 @@
                 ?>
         </fieldset>
         <?php echo $this->Form->end(__d('portal', 'Login')); ?>
+        <?php if($this->request->query['oauth_model'] == 'account'): ?>
+        <div class="noAccess"><?php echo $this->Html->link(__d('portal', 'Password forgotten'), '/accounts/password_reset'); ?></div>
+        <?php endif; ?>
 </div>
 <?php if($filter): ?>
     <div class="users form shibboleth">
@@ -29,10 +32,10 @@
         <fieldset>
             <legend><?php echo __d('portal', 'Not registered yet? Here you can create your personal user account'); ?></legend>
             <?php
-            echo $this->Form->input('first_name');
-            echo $this->Form->input('last_name');
-            echo $this->Form->input('email');
-            echo $this->Form->input('password');
+            echo $this->Form->input('first_name', array('label' => __d('portal', 'First Name')));
+            echo $this->Form->input('last_name', array('label' => __d('portal', 'Last Name')));
+            echo $this->Form->input('email', array('label' => __d('portal', 'Email')));
+            echo $this->Form->input('password', array('label' => __d('portal', 'Password')));
             ?>
 
         </fieldset>
