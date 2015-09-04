@@ -115,9 +115,28 @@ class OAuthController extends OAuthAppController {
          *
          */
         public function login() {
-                $OAuthParams = $this->OAuth->getAuthorizeParams();
+                $OAuthParams = $this->OAuth->getAuthorizeParams();                       
+                        
                 if ($this->request->is('post')) {
                         $this->validateRequest();
+                }
+                
+                if(isset($this->request->query['ip_access'])) {
+                        if ($this->Auth->login()) {
+                        //Write the auth params to the session for later
+                        $this->Session->write('OAuth.params', $OAuthParams);
+                        //Remove old auth messages
+                        $this->Session->delete('Message.auth');
+
+                        $account_id = null;
+
+                        $this->loadModel('User');
+                        if(!empty($currentUser['bundle_id'])) {
+                                $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
+                        }
+
+                        $this->redirect(array('action' => 'authorize', $account_id));
+                        }
                 }
 
                 if ($this->request->is('post') && $this->Auth->login()) {
@@ -138,13 +157,13 @@ class OAuthController extends OAuthAppController {
                             $account_id = $currentAccount['id'];
                             $this->Session->write('Auth.User', $currentUser);
                         }
-
+                        
                         $this->loadModel('User');
                         if(!empty($currentUser['bundle_id'])) {
                                 $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
                         }
-
                         $this->redirect(array('action' => 'authorize', $account_id));
+                        
                 } elseif ($this->request->is('post')) {
                         $this->Session->setFlash(__('Username or password is incorrect'), 'default', array(), 'auth');
                 }
