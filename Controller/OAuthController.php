@@ -123,19 +123,23 @@ class OAuthController extends OAuthAppController {
                 
                 if(isset($this->request->query['ip_access'])) {
                         if ($this->Auth->login()) {
-                        //Write the auth params to the session for later
-                        $this->Session->write('OAuth.params', $OAuthParams);
-                        //Remove old auth messages
-                        $this->Session->delete('Message.auth');
+                                //Write the auth params to the session for later
+                                $this->Session->write('OAuth.params', $OAuthParams);
+                                //Remove old auth messages
+                                $this->Session->delete('Message.auth');
 
-                        $account_id = null;
+                                $account_id = null;
 
-                        $this->loadModel('User');
-                        if(!empty($currentUser['bundle_id'])) {
-                                $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
-                        }
+                                $this->loadModel('User');
+                                if(!empty($currentUser['bundle_id'])) {
+                                        $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
+                                }
 
-                        $this->redirect(array('action' => 'authorize', $account_id));
+                                $this->redirect(array('action' => 'authorize', $account_id));
+                        } else {
+                                $accountlogin = $this->request->here();
+                                $accountlogin = str_replace('&ip_access=1', '&oauth_model=account', $accountlogin);
+                                $this->redirect($accountlogin);
                         }
                 }
 
