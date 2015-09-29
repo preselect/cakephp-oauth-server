@@ -143,6 +143,29 @@ class OAuthController extends OAuthAppController {
                         }
                 }
 
+                if(isset($this->request->query['authcode'])) {
+                        if ($this->Auth->login()) {
+                                //Write the auth params to the session for later
+                                $this->Session->write('OAuth.params', $OAuthParams);
+                                //Remove old auth messages
+                                $this->Session->delete('Message.auth');
+
+                                $account_id = null;
+
+                                $this->loadModel('User');
+                                if(!empty($currentUser['bundle_id'])) {
+                                        $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
+                                }
+                                
+                                $registerquery = $this->request->here(); 
+                                $registerquery = str_replace('&authcode', '&authcode_temp', $registerquery);
+                                $registerquery .= '&oauth_model=account';
+                                $this->redirect($registerquery);
+                        } else {
+                                $this->Session->setFlash(__('No access'), 'default', array(), 'auth');
+                        }
+                }
+                
                 if ($this->request->is('post') && $this->Auth->login()) {
                         //Write the auth params to the session for later
                         $this->Session->write('OAuth.params', $OAuthParams);

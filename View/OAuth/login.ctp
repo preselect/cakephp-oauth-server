@@ -3,7 +3,7 @@
     {
         $oauth_model = 'User';
     }
-    $filter = $this->Session->read('Auth.User.type') == 'COMPANY' && $this->request->query['oauth_model'] == 'account';
+    $filter = ($this->Session->read('Auth.User.type') == 'COMPANY' OR $this->Session->read('Auth.User.type') == 'LIMITED') && $this->request->query['oauth_model'] == 'account';
 
 ?>
 <div class="users form <?php echo $filter ? 'login' : 'filter_login'; ?>">
