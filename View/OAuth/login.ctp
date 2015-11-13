@@ -23,6 +23,9 @@ foreach ($OAuthParams as $key => $value) {
 ?>
                 <?php
                 echo $this->Form->input('username', array('label' => __d('portal', 'Username')));
+                if ($this->Session->read('Filter.external_api_url') <> '') { 
+                       echo $this->Form->input('subscription', array('label' => $this->Session->read('Filter.label_subscription'), 'required' => true)); 
+                }
                 echo $this->Form->input('password', array('label' => __d('portal', 'Password')));
                 ?>
         </fieldset>
@@ -39,6 +42,9 @@ foreach ($OAuthParams as $key => $value) {
         <?php
         echo $this->Form->input('first_name', array('label' => __d('portal', 'First Name')));
         echo $this->Form->input('last_name', array('label' => __d('portal', 'Last Name')));
+        if ($this->Session->read('Filter.external_api_url') <> '') { 
+               echo $this->Form->input('subscription', array('label' => $this->Session->read('Filter.label_subscription'), 'required' => true)); 
+        }        
         echo $this->Form->input('email', array('label' => __d('portal', 'Email')));
         echo $this->Form->input('password', array('label' => __d('portal', 'Password')));
         if ($this->Session->read('Filter.terms_text') <> '') {

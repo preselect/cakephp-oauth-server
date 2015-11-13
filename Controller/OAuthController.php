@@ -115,13 +115,25 @@ class OAuthController extends OAuthAppController {
          *
          */
         public function login() {
-                $OAuthParams = $this->OAuth->getAuthorizeParams();                       
-                        
+                $OAuthParams = $this->OAuth->getAuthorizeParams();
+
                 if ($this->request->is('post')) {
                         $this->validateRequest();
                 }
-                
-                if(isset($this->request->query['ip_access'])) {
+
+                if (isset($this->request->query['account_id'])) {
+                        $id = $this->request->query['account_id'];
+                        $this->loadModel('Account');
+                        if (!$this->Account->exists($id)) {
+                                throw new NotFoundException(__('Invalid account'));
+                        } else {
+                                $this->Account->id = $id;
+                                $this->Account->saveField('active', true);
+                                $this->Session->setFlash(__('Registration was sucesful. You can now login with your new account'));
+                        }
+                }
+
+                if (isset($this->request->query['ip_access'])) {
                         if ($this->Auth->login()) {
                                 //Write the auth params to the session for later
                                 $this->Session->write('OAuth.params', $OAuthParams);
@@ -131,7 +143,7 @@ class OAuthController extends OAuthAppController {
                                 $account_id = null;
 
                                 $this->loadModel('User');
-                                if(!empty($currentUser['bundle_id'])) {
+                                if (!empty($currentUser['bundle_id'])) {
                                         $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
                                 }
 
@@ -143,7 +155,7 @@ class OAuthController extends OAuthAppController {
                         }
                 }
 
-                if(isset($this->request->query['authcode'])) {
+                if (isset($this->request->query['authcode'])) {
                         if ($this->Auth->login()) {
                                 //Write the auth params to the session for later
                                 $this->Session->write('OAuth.params', $OAuthParams);
@@ -153,11 +165,11 @@ class OAuthController extends OAuthAppController {
                                 $account_id = null;
 
                                 $this->loadModel('User');
-                                if(!empty($currentUser['bundle_id'])) {
+                                if (!empty($currentUser['bundle_id'])) {
                                         $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
                                 }
-                                
-                                $registerquery = $this->request->here(); 
+
+                                $registerquery = $this->request->here();
                                 $registerquery = str_replace('&authcode', '&authcode_temp', $registerquery);
                                 $registerquery .= '&oauth_model=account';
                                 $this->redirect($registerquery);
@@ -165,7 +177,7 @@ class OAuthController extends OAuthAppController {
                                 $this->Session->setFlash(__('No access'), 'default', array(), 'auth');
                         }
                 }
-                
+
                 if ($this->request->is('post') && $this->Auth->login()) {
                         //Write the auth params to the session for later
                         $this->Session->write('OAuth.params', $OAuthParams);
@@ -174,23 +186,54 @@ class OAuthController extends OAuthAppController {
 
                         //Account inheritance
                         $account_id = null;
-                        if($this->useAccountsForOAuth())
-                        {
-                            $currentAccount = $this->Auth->user();
-                            @$currentUser = $currentAccount['User'];
-                            unset($currentAccount['User']);
-                            $currentUser['is_user']=1;
-                            $currentUser['account'] = $currentAccount;
-                            $account_id = $currentAccount['id'];
-                            $this->Session->write('Auth.User', $currentUser);
+                        if ($this->useAccountsForOAuth()) {
+                                $currentAccount = $this->Auth->user();
+                                @$currentUser = $currentAccount['User'];
+                                unset($currentAccount['User']);
+                                $currentUser['is_user'] = 1;
+                                $currentUser['account'] = $currentAccount;
+                                $account_id = $currentAccount['id'];
+                                $account_subscription = $currentAccount['subscription'];
+                                
+                                if(($currentUser['force_subscription']) && !isset($this->request->data['Account']['subscription'])) {
+                                        $this->Session->setFlash(__('Subscription is missing'));
+                                        $this->Session->delete('Filter');
+                                        $this->Session->delete('Auth');
+                                        $referer = str_replace('&account_id=', '&account_id_temp=', $this->referer());
+                                        return $this->redirect($referer);                                        
+                                }
+
+                                if (isset($this->request->data['Account']['subscription'])) {
+                                        $account_subscription = $currentAccount['subscription'];
+                                        $subscription = $this->request->data['Account']['subscription'];
+                                        if ($account_subscription <> $subscription) {
+                                                $this->Session->setFlash(__('Wrong subscription'));
+                                                $this->Session->delete('Filter');
+                                                $this->Session->delete('Auth');
+                                                $referer = str_replace('&account_id=', '&account_id_temp=', $this->referer());
+                                                return $this->redirect($referer);
+                                        }
+
+                                        $external_api_url = $this->Session->read('Filter.external_api_url');
+                                        $external_api_key = $this->Session->read('Filter.external_api_key');
+
+                                        if (!$this->validateSubscription($subscription, $external_api_url, $external_api_key)) {
+                                                $this->Session->setFlash(__('Expired subscription'));
+                                                $this->Session->delete('Filter');
+                                                $this->Session->delete('Auth');
+                                                $referer = str_replace('&account_id=', '&account_id_temp=', $this->referer());
+                                                return $this->redirect($referer);
+                                        }
+                                }
+
+                                $this->Session->write('Auth.User', $currentUser);
                         }
-                        
+
                         $this->loadModel('User');
-                        if(!empty($currentUser['bundle_id'])) {
+                        if (!empty($currentUser['bundle_id'])) {
                                 $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
                         }
                         $this->redirect(array('action' => 'authorize', $account_id));
-                        
                 } elseif ($this->request->is('post')) {
                         $this->Session->setFlash(__('Username or password is incorrect'), 'default', array(), 'auth');
                 }
@@ -266,5 +309,18 @@ class OAuthController extends OAuthAppController {
                         throw new BadRequestException(__d('OAuth', 'The request has been black-holed'));
                 }
         }
-        
+
+        private function validateSubscription($subscription, $external_api_url, $external_api_key) {
+                $hash = md5($subscription . $external_api_key);
+                $url = $external_api_url . $subscription . '&hash=' . $hash;
+                $get_validation = file_get_contents($url);
+                $get_validation = json_decode($get_validation);
+                if ($get_validation->status_code == '1') {
+                        $validation = true;
+                } else {
+                        $validation = false;
+                }
+                return $validation;
+        }
+
 }
