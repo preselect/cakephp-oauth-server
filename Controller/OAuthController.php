@@ -168,7 +168,9 @@ class OAuthController extends OAuthAppController {
                                 if (!empty($currentUser['bundle_id'])) {
                                         $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
                                 }
-
+                                if (isset($this->request->query['start'])) {
+                                        $this->redirect(array('action' => 'authorize', $account_id));
+                                }
                                 $registerquery = $this->request->here();
                                 $registerquery = str_replace('&authcode', '&authcode_temp', $registerquery);
                                 $registerquery .= '&oauth_model=account';
@@ -196,7 +198,7 @@ class OAuthController extends OAuthAppController {
                                 $account_subscription = $currentAccount['subscription'];
                                 
                                 if(($currentUser['force_subscription']) && !isset($this->request->data['Account']['subscription'])) {
-                                        $this->Session->setFlash(__('Subscription is missing'));
+                                        $this->Session->setFlash($this->Session->read('Filter.label_subscription') . __(' is missing'));
                                         $this->Session->delete('Filter');
                                         $this->Session->delete('Auth');
                                         $referer = str_replace('&account_id=', '&account_id_temp=', $this->referer());
@@ -207,7 +209,7 @@ class OAuthController extends OAuthAppController {
                                         $account_subscription = $currentAccount['subscription'];
                                         $subscription = $this->request->data['Account']['subscription'];
                                         if ($account_subscription <> $subscription) {
-                                                $this->Session->setFlash(__('Wrong subscription'));
+                                                $this->Session->setFlash(__('Wrong ') . $this->Session->read('Filter.label_subscription'));
                                                 $this->Session->delete('Filter');
                                                 $this->Session->delete('Auth');
                                                 $referer = str_replace('&account_id=', '&account_id_temp=', $this->referer());
@@ -218,7 +220,7 @@ class OAuthController extends OAuthAppController {
                                         $external_api_key = $this->Session->read('Filter.external_api_key');
 
                                         if (!$this->validateSubscription($subscription, $external_api_url, $external_api_key)) {
-                                                $this->Session->setFlash(__('Expired subscription'));
+                                                $this->Session->setFlash(__('Expired ') . $this->Session->read('Filter.label_subscription'));
                                                 $this->Session->delete('Filter');
                                                 $this->Session->delete('Auth');
                                                 $referer = str_replace('&account_id=', '&account_id_temp=', $this->referer());
