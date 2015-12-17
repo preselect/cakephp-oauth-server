@@ -116,7 +116,25 @@ class OAuthController extends OAuthAppController {
          */
         public function login() {
                 $OAuthParams = $this->OAuth->getAuthorizeParams();
-
+                
+                if (isset($this->request->query['subscription'])&& isset($this->request->query['hash'])) {
+                    $external_api_url = $this->Session->read('Filter.external_api_url');
+                    $external_api_key = $this->Session->read('Filter.external_api_key');                    
+                    $subscription = $this->request->query['subscription'];
+                    $hash = md5($subscription . $external_api_key);
+                    
+                    if ($hash <> $this->request->query['hash']) {
+                        throw new NotFoundException(__('Invalid hash'));
+                        }
+                    
+                    if (!$this->validateSubscription($subscription, $external_api_url, $external_api_key)) {
+                        $this->Session->setFlash(__('Expired ') . $this->Session->read('Filter.label_subscription'));
+                        $this->Session->delete('Auth');
+                        $accountlogin = $this->request->here();
+                        $this->redirect($accountlogin);
+                        }
+                }
+                
                 if ($this->request->is('post')) {
                         $this->validateRequest();
                 }
@@ -197,35 +215,21 @@ class OAuthController extends OAuthAppController {
                                 $account_id = $currentAccount['id'];
                                 $account_subscription = $currentAccount['subscription'];
                                 
-                                if(($currentUser['force_subscription']) && !isset($this->request->data['Account']['subscription'])) {
-                                        $this->Session->setFlash($this->Session->read('Filter.label_subscription') . __(' is missing'));
-                                        $this->Session->delete('Filter');
-                                        $this->Session->delete('Auth');
-                                        $referer = str_replace('&account_id=', '&account_id_temp=', $this->referer());
-                                        return $this->redirect($referer);                                        
-                                }
+                                if(($currentUser['force_subscription'])) {
 
-                                if (isset($this->request->data['Account']['subscription'])) {
-                                        $account_subscription = $currentAccount['subscription'];
-                                        $subscription = $this->request->data['Account']['subscription'];
-                                        if ($account_subscription <> $subscription) {
-                                                $this->Session->setFlash(__('Wrong ') . $this->Session->read('Filter.label_subscription'));
-                                                $this->Session->delete('Filter');
-                                                $this->Session->delete('Auth');
-                                                $referer = str_replace('&account_id=', '&account_id_temp=', $this->referer());
-                                                return $this->redirect($referer);
-                                        }
+                                    // Check ob expired
+                                    $account_subscription = $currentAccount['subscription'];
+                                    $external_api_url = $this->Session->read('Filter.external_api_url');
+                                    $external_api_key = $this->Session->read('Filter.external_api_key');
 
-                                        $external_api_url = $this->Session->read('Filter.external_api_url');
-                                        $external_api_key = $this->Session->read('Filter.external_api_key');
-
-                                        if (!$this->validateSubscription($subscription, $external_api_url, $external_api_key)) {
-                                                $this->Session->setFlash(__('Expired ') . $this->Session->read('Filter.label_subscription'));
-                                                $this->Session->delete('Filter');
-                                                $this->Session->delete('Auth');
-                                                $referer = str_replace('&account_id=', '&account_id_temp=', $this->referer());
-                                                return $this->redirect($referer);
-                                        }
+                                    if (!$this->validateSubscription($account_subscription, $external_api_url, $external_api_key)) {
+                                            $this->Session->setFlash($this->Session->read('Filter.label_message_expired'));
+                                            $this->Session->delete('Filter');
+                                            $this->Session->delete('Auth');
+                                            $referer = str_replace('&account_id=', '&account_id_temp=', $this->referer());
+                                            return $this->redirect($referer);
+                                    }                                    
+                                    
                                 }
 
                                 $this->Session->write('Auth.User', $currentUser);
@@ -240,7 +244,7 @@ class OAuthController extends OAuthAppController {
                         $this->Session->setFlash(__('Username or password is incorrect'), 'default', array(), 'auth');
                 }
 
-                $this->set(compact('OAuthParams'));
+                $this->set(compact('OAuthParams', 'subscription'));
         }
 
         /**

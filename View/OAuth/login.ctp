@@ -10,6 +10,13 @@ if (empty($oauth_model)) {
         $oauth_model = 'User';
 }
 $filter = ($this->Session->read('Auth.User.type') == 'COMPANY' OR $this->Session->read('Auth.User.type') == 'LIMITED') && $this->request->query['oauth_model'] == 'account';
+
+if (isset($this->request->query['mailadresse'])) {
+        $email = urldecode($this->request->query['mailadresse']);
+} else {
+        $email = '';
+}
+
 ?>
 <div class="users form <?php echo $filter ? 'login' : 'filter_login'; ?>">
 <?php echo $this->Session->flash('auth'); ?>
@@ -22,10 +29,7 @@ foreach ($OAuthParams as $key => $value) {
 }
 ?>
                 <?php
-                echo $this->Form->input('username', array('label' => __d('portal', 'Username')));
-                if ($this->Session->read('Filter.external_api_url') <> '') { 
-                       echo $this->Form->input('subscription', array('label' => $this->Session->read('Filter.label_subscription'), 'required' => true)); 
-                }
+                echo $this->Form->input('username', array('label' => __d('portal', 'Username'), 'default' => $email));
                 echo $this->Form->input('password', array('label' => __d('portal', 'Password')));
                 ?>
         </fieldset>
@@ -43,9 +47,14 @@ foreach ($OAuthParams as $key => $value) {
         echo $this->Form->input('first_name', array('label' => __d('portal', 'First Name')));
         echo $this->Form->input('last_name', array('label' => __d('portal', 'Last Name')));
         if ($this->Session->read('Filter.external_api_url') <> '') { 
-               echo $this->Form->input('subscription', array('label' => $this->Session->read('Filter.label_subscription'), 'required' => true)); 
+                if(isset($subscription)) {
+                       // echo $this->Form->input('subscription_disabled', array('label' => $this->Session->read('Filter.label_subscription'), 'default' => $subscription, 'disabled'=> 'disabled'));
+                       echo $this->Form->input('subscription', array('type' => 'hidden', 'default' => $subscription));  
+                } else {
+                       echo $this->Form->input('subscription', array('label' => $this->Session->read('Filter.label_subscription'), 'required' => true));                               
+                }
         }        
-        echo $this->Form->input('email', array('label' => __d('portal', 'Email')));
+        echo $this->Form->input('email', array('label' => __d('portal', 'Email'), 'default' => $email));
         echo $this->Form->input('password', array('label' => __d('portal', 'Password')));
         if ($this->Session->read('Filter.terms_text') <> '') {
         echo $this->Form->input('agreed', array('div' => false,
