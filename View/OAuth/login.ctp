@@ -48,7 +48,7 @@ foreach ($OAuthParams as $key => $value) {
         echo $this->Form->input('last_name', array('label' => __d('portal', 'Last Name')));
         if ($this->Session->read('Filter.external_api_url') <> '') { 
                 if(isset($subscription)) {
-                       // echo $this->Form->input('subscription_disabled', array('label' => $this->Session->read('Filter.label_subscription'), 'default' => $subscription, 'disabled'=> 'disabled'));
+                       echo $this->Form->input('subscription_disabled', array('label' => $this->Session->read('Filter.label_subscription'), 'default' => $subscription, 'disabled'=> 'disabled'));
                        echo $this->Form->input('subscription', array('type' => 'hidden', 'default' => $subscription));  
                 } else {
                        echo $this->Form->input('subscription', array('label' => $this->Session->read('Filter.label_subscription'), 'required' => true));                               
