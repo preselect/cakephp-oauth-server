@@ -62,7 +62,6 @@ class OAuthController extends OAuthAppController {
                 parent::beforeFilter();
                 $this->Auth->allow($this->OAuth->allowedActions);
                 $this->Security->blackHoleCallback = 'blackHole';
-                $this->OAuth->CONFIG_ACCESS_LIFETIME = time() + 18000;
         }
 
         /**
@@ -135,6 +134,62 @@ class OAuthController extends OAuthAppController {
                         $this->redirect($accountlogin);
                         }
                 }
+                
+                if (isset($this->request->query['token'])) {
+                    $external_api_url = $this->Session->read('Filter.external_api_url');
+                    $bundle_id = $this->Session->read('Filter.id');
+                    $token = $this->request->query['token'];
+                    $external_account_details = $this->validateToken($token, $external_api_url);
+                    if (!$external_account_details) {
+                        $this->Session->setFlash(__('Invalid token'));
+                        } else {
+                            $this->Session->write('OAuth.params', $OAuthParams);
+                            // get main User via bundle user_id
+                            $this->loadModel('User');
+                            $user = $this->User->findByBundleId($bundle_id);
+                            // debug($user);
+                            $user_id = $user['User']['id'];
+                            // get account if already exists
+                            $this->loadModel('Account');
+                            $account = $this->Account->findByUsername($external_account_details['email']);
+                            if(empty($account)) {
+                                // Create account & login
+                                $this->Account->create();
+                                $account['Account']['user_id'] = $user_id;
+                                $account['Account']['active'] = 1;
+                                $account['Account']['password'] = md5($external_account_details['userid']);
+                                $account['Account']['username'] = $external_account_details['email'];
+                                $account['Account']['email'] = $external_account_details['email'];
+                                $account['Account']['first_name'] = $external_account_details['vorname'];
+                                $account['Account']['last_name'] = $external_account_details['name'];
+                                $account['Account']['subscription'] = $external_account_details['userid'];
+                                if ($this->Account->save($account)) {
+                                        $currentUser = $user['User'];
+                                        $currentAccount = $this->Account->read(null, $this->Account->getLastInsertID());
+                                        $currentUser['is_user'] = 1;
+                                        $currentUser['account'] = $currentAccount['Account'];
+                                        unset($currentUser['account']['password']);
+                                        if (!empty($currentUser['bundle_id'])) {
+                                                $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
+                                        }
+                                        $this->Session->write('Auth.User', $currentUser);
+                                        $this->redirect(array('action' => 'authorize', $currentUser['account']['id']));
+                                }
+                            } else {
+                                // autologin    
+                                $currentUser = $user['User'];
+                                $currentAccount = $account;
+                                $currentUser['is_user'] = 1;
+                                $currentUser['account'] = $currentAccount['Account'];
+                                unset($currentUser['account']['password']);
+                                if (!empty($currentUser['bundle_id'])) {
+                                        $this->User->Bundle->setBundleFilter($currentUser['bundle_id']);
+                                }
+                                $this->Session->write('Auth.User', $currentUser);
+                                $this->redirect(array('action' => 'authorize', $currentUser['account']['id']));
+                            }
+                        }
+                }                
                 
                 if ($this->request->is('post')) {
                         $this->validateRequest();
@@ -330,4 +385,16 @@ class OAuthController extends OAuthAppController {
                 return $validation;
         }
 
+        private function validateToken($token, $external_api_url) {
+                $url = $external_api_url . $token;
+                $get_validation = file_get_contents($url);
+                $get_validation = json_decode($get_validation);
+                if ($get_validation->status == 'OK') {
+                        $account_details = (array) $get_validation;
+                        return $account_details;
+                } else {
+                        return false;
+                }
+        }        
+        
 }
