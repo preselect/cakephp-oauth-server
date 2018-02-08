@@ -62,6 +62,7 @@ class OAuthController extends OAuthAppController {
                 parent::beforeFilter();
                 $this->Auth->allow($this->OAuth->allowedActions);
                 $this->Security->blackHoleCallback = 'blackHole';
+                $this->OAuth->CONFIG_ACCESS_LIFETIME = time() + 18000;
         }
 
         /**
