@@ -264,6 +264,12 @@ class OAuthController extends OAuthAppController {
                         $account_id = null;
                         if ($this->useAccountsForOAuth()) {
                                 $currentAccount = $this->Auth->user();
+                                if ($currentAccount['active'] <> true) {
+                                        $this->Session->setFlash(__('Konto nicht aktiv. Testzugang abgelaufen.'));
+                                        $this->Session->delete('Auth');
+                                        $accountlogin = $this->request->here();
+                                        $this->redirect($accountlogin);
+                                }
                                 @$currentUser = $currentAccount['User'];
                                 unset($currentAccount['User']);
                                 $currentUser['is_user'] = 1;
